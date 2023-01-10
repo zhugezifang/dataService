@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('新增api服务配置')"/>
+    <th:block th:include="include :: select2-css"/>
+    <th:block th:include="include :: bootstrap-select-css"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <form class="form-horizontal m" id="form-post-add">
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">apiName：</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" name="apiName" id="apiName" onblur="apiPathFun()" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">apiPath：</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" name="apiPath" id="apiPath" disabled="disabled" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">dbConfig：</label>
+            <div class="col-sm-8">
+                <select class="form-control" name="dbConfig" id="dbConfig" required>
+                    <option value="">--请选择数据源--</option>
+                    <option th:each="dblist:${dbList}" th:value="${dblist.id}" th:text="${dblist.connectName}"></option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">请求协议：</label>
+            <div class="col-sm-8">
+                <select class="form-control" name="requestType" id="requestType" required>
+                    <option value="">--请选择请求协议--</option>
+                    <option value="http">http</option>
+                    <option value="rpc">rpc</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required" id="requestMode">请求方式：</label>
+            <div class="col-sm-8">
+                <label class="check-box">
+                    <input type="checkbox" value="get" name="requestMode">get</label>
+                <label class="check-box">
+                    <input type="checkbox" value="post" name="requestMode">post</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">qps：</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" name="qps" id="qps" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">timeOut：</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" name="timeOut" id="timeOut" required>
+                <span class="m-b-none"><i class="fa fa-info-circle"></i>毫秒</span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">sql：</label>
+            <div class="col-sm-8">
+                <textarea class="form-control" name="apiSql" id="apiSql" style="height: 300px" placeholder="SELECT
+                name,
+				addr as address,
+				sum(num) as total_num
+				FROM
+				table_name
+				WHERE
+				user_id = ${uid};
+				(1)SELECT查询的字段即为API返回参数
+				(2)如果定义了字段别名，则返回参数名称为字段别名
+				(3)支持SQL函数
+				(4)WHERE条件中的参数为API请求参数，参数格式为${参数名}" required onblur="paramFun()"></textarea>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">请求参数：</label>
+            <div class="col-sm-8">
+                <label class="col-sm-3">参数名称：</label>
+                <label class="col-sm-3">参数类型：</label>
+                <label class="col-sm-3">说明：</label>
+            </div>
+        </div>
+
+        <div id="paramDiv">
+
+            <!--<div class="form-group">
+                <label class="col-sm-3"></label>
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <input type="text" name="paramName" id="paramName" value="paramTxt" required
+                                   class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <select class="col-sm-3 form-control" name="paramType" id="paramType" required>
+                                <option value="String">String</option>
+                                <option value="Bigint">Bigint</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <input class="form-control" type="text" name="mark" id="mark" required>
+                        </div>
+                    </div>
+                </div>
+            </div>-->
+
+        </div>
+
+        <br/>
+
+        <!--<div class="form-group">
+            <div class="col-sm-4 col-sm-offset-2">
+                <button class="btn btn-primary" type="submit" onclick="submitHandler()">保存</button>
+                <button class="btn btn-white" type="submit">取消</button>
+            </div>
+        </div>-->
+
+    </form>
+</div>
+<th:block th:include="include :: footer"/>
+<script type="text/javascript">
+    var prefix = ctx + "system/apiConfig";
+
+    function apiPathFun() {
+        $("#apiPath").val($("#apiName").val());
+    }
+
+    $("#form-post-add").validate({
+        onkeyup: false,
+        rules: {
+            apiName: {
+                remote: {
+                    url: ctx + "system/apiConfig/checkNameUnique",
+                    type: "post",
+                    dataType: "json",
+                    data: {
+                        "apiName": function () {
+                            return $.common.trim($("#apiName").val());
+                        }
+                    },
+                    dataFilter: function (data, type) {
+                        return $.validate.unique(data);
+                    }
+                }
+            },
+        },
+        messages: {
+            "apiName": {
+                remote: "apiName已经存在"
+            }
+        },
+        focusCleanup: true
+    });
+
+    function paramFun() {
+
+        var paraHtml = "<div class=\"form-group\">\n" +
+            "                <label class=\"col-sm-3\"></label>\n" +
+            "                <div class=\"col-sm-8\">\n" +
+            "                    <div class=\"row\">\n" +
+            "                        <div class=\"col-md-3\">\n" +
+            "                            <input type=\"text\" name=\"paramName\" id=\"paramName\" value=\"paramTxt\" required class=\"form-control\">\n" +
+            "                        </div>\n" +
+            "                        <div class=\"col-md-3\">\n" +
+            "                            <select class=\"col-sm-3 form-control\" name=\"paramType\" id=\"paramType\" required>\n" +
+            "                                <option value=\"String\">String</option>\n" +
+            "                                <option value=\"Bigint\">Bigint</option>\n" +
+            "                            </select>\n" +
+            "                        </div>\n" +
+            "                        <div class=\"col-md-3\">\n" +
+            "                            <input class=\"form-control\" type=\"text\" name=\"remark\" id=\"remark\">\n" +
+            "                        </div>\n" +
+            "                    </div>\n" +
+            "                </div>\n" +
+            "            </div>";
+
+        var sql = $("#apiSql").val();
+        $("#paramDiv").html("");
+        if (sql.trim() == "") {
+            return;
+        }
+        console.log(sql);
+        var regex = /\{(.+?)\}/g;
+        var arr = sql.match(regex);
+        //console.log(arr.length);
+        var paraResultHtml = "";
+        for (var i = 0; i < arr.length; i++) {
+            var txt = arr[i].replace("{", "").replace("}", "");
+            console.log(txt);
+            paraResultHtml += paraHtml.replaceAll("paramName", "paramName" + i).replaceAll("paramType", "paramType" + i).replaceAll("remark", "remark" + i).replaceAll("paramTxt", txt);
+        }
+
+        $("#paramDiv").append(paraResultHtml);
+
+    }
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            var paramsList = [];
+            var size = $("#paramDiv .form-group").length;
+            console.log(size);
+            for (var i = 0; i < size; i++) {
+                var paramNameId = "#paramName" + i;
+                var paramTypeId = "#paramType" + i;
+                var remarkId = "#remark" + i;
+                paramsList.push({
+                    "name": $(paramNameId).val(),
+                    "type": $(paramTypeId).val(),
+                    "remark": $(remarkId).val()
+                });
+            }
+
+            var request_mode_value = [];
+            $('input[name="requestMode"]:checked').each(function () {
+                request_mode_value.push($(this).val());
+            });
+
+            var requestMode = request_mode_value.join(",");  //指定分隔符
+            console.log(requestMode);
+
+            var params = JSON.stringify(paramsList);
+            console.log(params);
+            var config = {
+                url: prefix + "/add",
+                type: "post",
+                dataType: "json",
+                data: {
+                    "dbConfigId": $("#dbConfig").val(),
+                    "apiName": $("#apiName").val(),
+                    "apiPath": $("#apiPath").val(),
+                    "requestType": $("#requestType").val(),
+                    "requestMode": requestMode,
+                    "apiSql": $("#apiSql").val(),
+                    "params": params,
+                    "qps": $("#qps").val(),
+                    "timeOut": $("#timeOut").val()
+                },
+                beforeSend: function () {
+                    $.modal.loading("正在处理中，请稍候...");
+                },
+                success: function (result) {
+                    console.log(result);
+                    if (typeof callback == "function") {
+                        callback(result);
+                    }
+                    if (result.code == web_status.SUCCESS) {
+                        //$.modal.alertSuccess(result.msg)
+                        //$.operate.save(prefix + "/add", $('#form-post-add').serialize());
+                    } else if (result.code == web_status.WARNING) {
+                        $.modal.alertWarning(result.msg)
+                    } else {
+                        $.modal.alertError(result.msg);
+                    }
+                    $.modal.closeLoading();
+                    $.operate.successCallback(result);
+                }
+            };
+            $.ajax(config)
+
+        }
+    }
+
+</script>
+</body>
+</html>

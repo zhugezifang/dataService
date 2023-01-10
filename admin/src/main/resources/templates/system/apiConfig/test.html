@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('测试api服务')"/>
+    <th:block th:include="include :: select2-css"/>
+    <th:block th:include="include :: bootstrap-select-css"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <form class="form-horizontal m" id="form-post-add" th:object="${apiConfig}">
+        <input id="id" name="id" type="hidden" th:field="*{id}"/>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">apiName：</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" name="apiName" id="apiName" th:field="*{apiName}"
+                       disabled="disabled">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label">apiPath：</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" name="apiPath" id="apiPath" th:field="*{apiPath}"
+                       disabled="disabled">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">请求参数：</label>
+            <div class="col-sm-8">
+                <label class="col-sm-3">参数名称：</label>
+                <label class="col-sm-3">参数类型：</label>
+                <label class="col-sm-3">参数值：</label>
+            </div>
+        </div>
+
+        <div id="paramDiv">
+
+            <!--<div class="form-group" th:each="pa:*{param}">
+                <label class="col-sm-3"></label>
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <input type="text" name="paramName" id="paramName" value="paramName" th:field="${pa.name}" disabled="disabled"
+                                   class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" name="paramName" id="paramType" value="paramType" th:field="${pa.type}" disabled="disabled"
+                                   class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <input class="form-control" type="text" name="remark" id="remark" required>
+                        </div>
+                    </div>
+                </div>
+            </div>-->
+
+            <div class="form-group" th:each="pa :*{param}">
+
+                <label class="col-sm-3"></label>
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <input type="text" name="paramName" th:value="${pa.name}" disabled="disabled"
+                                   class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" name="paramType" th:value="${pa.type}" disabled="disabled"
+                                   class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <input class="form-control" type="text" name="paramValue" required>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <br/>
+
+        <br/>
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">结果：</label>
+            <div class="col-sm-8">
+                <textarea class="form-control" name="result" id="result" style="height: 300px"
+                          disabled="disabled"></textarea>
+            </div>
+        </div>
+
+    </form>
+
+</div>
+<th:block th:include="include :: footer"/>
+<script type="text/javascript">
+    var prefix = ctx + "system/apiConfig";
+
+    function paramFun() {
+        var sql = $("#apiSql").val();
+        $("#paramDiv").html("");
+        if (sql.trim() == "") {
+            return;
+        }
+        console.log(sql);
+        var regex = /\{(.+?)\}/g;
+        var arr = sql.match(regex);
+        //console.log(arr.length);
+        var paraResultHtml = "";
+        for (var i = 0; i < arr.length; i++) {
+            var txt = arr[i].replace("{", "").replace("}", "");
+            console.log(txt);
+            paraResultHtml += paraHtml.replaceAll("paramName", "paramName" + i).replaceAll("paramType", "paramType" + i).replaceAll("remark", "remark" + i).replaceAll("paramTxt", txt);
+        }
+
+        $("#paramDiv").append(paraResultHtml);
+
+    }
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            var paramsList = [];
+            var paramsName = [];
+            var paramsValue = [];
+            var paramsType = [];
+            $("input[name='paramName']").each(function () {
+                paramsName.push($(this).val());
+                //console.log($(this).val());
+            });
+            $("input[name='paramValue']").each(function () {
+                paramsValue.push($(this).val());
+                //console.log($(this).val());
+            });
+            $("input[name='paramType']").each(function () {
+                paramsType.push($(this).val());
+                //console.log($(this).val());
+            });
+
+            for (var i = 0; i < paramsName.length; i++) {
+                paramsList.push({
+                    "name": paramsName[i],
+                    "type": paramsType[i],
+                    "value": paramsValue[i]
+                });
+            }
+            var params = JSON.stringify(paramsList);
+            console.log(params);
+            var config = {
+                url: prefix + "/testCase",
+                type: "post",
+                dataType: "json",
+                data: {
+                    "apiName": $("#apiName").val(),
+                    "params": params
+                },
+                beforeSend: function () {
+                    $.modal.loading("正在处理中，请稍候...");
+                },
+                success: function (result) {
+                    if (typeof callback == "function") {
+                        callback(result);
+                    }
+                    if (result.code == web_status.SUCCESS) {
+                        console.log(JSON.stringify(result.data));
+                        $("#result").val(JSON.stringify(result.data, null, 4));
+                        //$.modal.alertSuccess(result.msg)
+                        //$.operate.save(prefix + "/add", $('#form-post-add').serialize());
+                    } else if (result.code == web_status.WARNING) {
+                        $.modal.alertWarning(result.msg)
+                    } else {
+                        $.modal.alertError(result.msg);
+                    }
+                    $.modal.closeLoading();
+                }
+            };
+            $.ajax(config)
+
+        }
+    }
+
+</script>
+</body>
+</html>

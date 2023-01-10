@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vince.xq.system.mapper.ApiConfigMapper">
+
+    <resultMap type="ApiConfig" id="ApiConfigResult">
+        <id property="id" column="id"/>
+        <result property="dbConfigId" column="db_config_id"/>
+        <result property="apiName" column="api_name"/>
+        <result property="apiPath" column="api_path"/>
+        <result property="requestType" column="request_type"/>
+        <result property="requestMode" column="request_mode"/>
+        <result property="apiSql" column="api_sql"/>
+        <result property="params" column="params"/>
+        <result property="apiResult" column="api_result"/>
+        <result property="online" column="online"/>
+        <result property="qps" column="qps"/>
+        <result property="timeOut" column="time_out"/>
+        <result property="apiToken" column="api_token"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="selecApiConfigVo">
+        select id,
+               db_config_id,
+               api_name,
+               api_path,
+               request_type,
+               request_mode,
+               api_sql,
+               params,
+               api_result,
+               api_token,
+               create_by,
+               create_time,
+               online,
+               qps,
+               time_out
+        from api_config
+    </sql>
+
+    <select id="selectApiConfigList" parameterType="ApiConfig" resultMap="ApiConfigResult">
+        <include refid="selecApiConfigVo"/>
+        <where>
+            <if test="apiName != null and apiName != ''">
+                AND api_name like concat('%', #{apiName}, '%')
+            </if>
+        </where>
+    </select>
+
+    <select id="selectApiConfigAll" resultMap="ApiConfigResult">
+        <include refid="selecApiConfigVo"/>
+    </select>
+
+    <select id="selectApiConfigById" parameterType="Long" resultMap="ApiConfigResult">
+        <include refid="selecApiConfigVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectApiConfigByApiName" parameterType="String" resultMap="ApiConfigResult">
+        <include refid="selecApiConfigVo"/>
+        where api_name = #{apiName}
+    </select>
+
+    <select id="checkApiNameUnique" parameterType="String" resultMap="ApiConfigResult">
+        <include refid="selecApiConfigVo"/>
+        where api_name =#{apiName} limit 1
+    </select>
+
+    <delete id="deleteApiConfigByIds" parameterType="Long">
+        delete from api_config where id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="updateApiConfigOnline" parameterType="ApiConfig">
+        update api_config
+        <set>
+            online = #{online},
+            create_time = sysdate()
+        </set>
+        where id = #{id}
+    </update>
+
+
+    <update id="updateApiConfig" parameterType="ApiConfig">
+        update api_config
+        <set>
+            <if test="dbConfigId != null and dbConfigId != ''">db_config_id = #{dbConfigId},</if>
+            <if test="apiName != null and apiName != ''">api_name = #{apiName},</if>
+            <if test="apiPath != null and apiPath != ''">api_path = #{apiPath},</if>
+            <if test="requestType != null and requestType != ''">request_type = #{requestType},</if>
+            <if test="apiSql != null and apiSql != ''">api_sql = #{apiSql},</if>
+            <if test="params != null and params != ''">params = #{params},</if>
+            <if test="apiResult != null and apiResult != ''">api_result = #{apiResult},</if>
+            <if test="online != null and online != ''">online = #{online},</if>
+            <if test="qps != null and qps != ''">qps = #{qps},</if>
+            <if test="timeOut != null and timeOut != ''">time_out = #{timeOut},</if>
+            <if test="apiToken != null and apiToken != ''">api_token = #{apiToken},</if>
+            <if test="createBy != null and createBy != ''">create_by = #{createBy},</if>
+            create_time = sysdate()
+        </set>
+        where id = #{id}
+    </update>
+
+    <insert id="insertApiConfig" parameterType="ApiConfig" useGeneratedKeys="true" keyProperty="id">
+        insert into api_config(
+        <if test="dbConfigId != null and dbConfigId != ''">db_config_id,</if>
+        <if test="apiName != null and apiName != ''">api_name,</if>
+        <if test="apiPath != null and apiPath != ''">api_path,</if>
+        <if test="requestType != null and requestType != ''">request_type,</if>
+        <if test="requestMode != null and requestMode != ''">request_mode,</if>
+        <if test="apiSql != null and apiSql != ''">api_sql,</if>
+        <if test="params != null and params != ''">params,</if>
+        <if test="apiResult != null and apiResult != ''">api_result,</if>
+        <if test="online != null and online != ''">online,</if>
+        <if test="qps != null and qps != ''">qps,</if>
+        <if test="timeOut != null and timeOut != ''">time_out,</if>
+        <if test="apiToken != null and apiToken != ''">api_token,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        create_time
+        )values(
+        <if test="dbConfigId != null and dbConfigId != ''">#{dbConfigId},</if>
+        <if test="apiName != null and apiName != ''">#{apiName},</if>
+        <if test="apiPath != null and apiPath != ''">#{apiPath},</if>
+        <if test="requestType != null and requestType != ''">#{requestType},</if>
+        <if test="requestMode != null and requestMode != ''">#{requestMode},</if>
+        <if test="apiSql != null and apiSql != ''">#{apiSql},</if>
+        <if test="params != null and params != ''">#{params},</if>
+        <if test="apiResult != null and apiResult != ''">#{apiResult},</if>
+        <if test="online != null and online != ''">#{online},</if>
+        <if test="qps != null and qps != ''">#{qps},</if>
+        <if test="timeOut != null and timeOut != ''">#{timeOut},</if>
+        <if test="apiToken != null and apiToken != ''">#{apiToken},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        sysdate()
+        )
+    </insert>
+
+    <select id="selectApiConfigsByUser" parameterType="String" resultMap="ApiConfigResult">
+        SELECT id, api_name
+        FROM api_config
+        WHERE create_by = #{createBy}
+    </select>
+
+</mapper> 
