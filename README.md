@@ -1,11 +1,11 @@
 # dataCompare
-![](https://gitee.com/ZhuGeZiFang/data-compare/badge/star.svg)
-![](https://gitee.com/ZhuGeZiFang/data-compare/badge/fork.svg?theme=gvp)
-![](https://img.shields.io/github/stars/zhugezifang/dataCompare.svg?logo=GitHub)
-![](https://img.shields.io/github/forks/zhugezifang/dataCompare.svg?logo=GitHub)
-![](https://img.shields.io/github/watchers/zhugezifang/dataCompare.svg?logo=GitHub)
-![](https://img.shields.io/github/license/zhugezifang/dataCompare.svg)
-![](https://img.shields.io/github/v/release/zhugezifang/dataCompare?label=latest&style=flat-square)
+![](https://gitee.com/ZhuGeZiFang/dataService/badge/star.svg)
+![](https://gitee.com/ZhuGeZiFang/dataService/badge/fork.svg?theme=gvp)
+![](https://img.shields.io/github/stars/zhugezifang/dataService.svg?logo=GitHub)
+![](https://img.shields.io/github/forks/zhugezifang/dataService.svg?logo=GitHub)
+![](https://img.shields.io/github/watchers/zhugezifang/dataService.svg?logo=GitHub)
+![](https://img.shields.io/github/license/zhugezifang/dataService.svg)
+![](https://img.shields.io/github/v/release/zhugezifang/dataService?label=latest&style=flat-square)
 
 [![EN doc](https://img.shields.io/badge/document-English-blue.svg)](README.md)
 [![CN doc](https://img.shields.io/badge/文档-中文版-blue.svg)](README-CN.md)
