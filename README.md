@@ -31,6 +31,9 @@ c.数据模型统一化，支持多种数据源接入, 即:OneModel
 
 #### 软件架构
 
+![image](https://user-images.githubusercontent.com/28300167/215253954-e94851c6-65b9-4ab5-a7b8-9e71a4765be9.png)
+
+
 技术栈:
 
 后端：Spring boot + Mybatis
