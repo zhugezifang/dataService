@@ -31,6 +31,9 @@ c.数据模型统一化，支持多种数据源接入, 即:OneModel
 
 #### 软件架构
 
+![image](https://user-images.githubusercontent.com/28300167/215253954-e94851c6-65b9-4ab5-a7b8-9e71a4765be9.png)
+
+
 技术栈:
 
 后端：Spring boot + Mybatis
@@ -39,8 +42,20 @@ c.数据模型统一化，支持多种数据源接入, 即:OneModel
 
 #### 系统流程图
 
+![image](https://user-images.githubusercontent.com/28300167/215254320-21a90c64-e336-4c59-8743-eeada2b8a486.png)
+
+![image](https://user-images.githubusercontent.com/28300167/215254356-a2968fbb-f82f-4147-b491-254ae4d31ed8.png)
+
 
 #### 系统功能演示
+主页
+![image](https://user-images.githubusercontent.com/28300167/215254586-8d38b001-3a24-4f2b-858f-9f4b434f24aa.png)
+数据源管理
+![image](https://user-images.githubusercontent.com/28300167/215254616-a0278626-0338-4369-a709-9fc750ed8b27.png)
+新增api服务
+![image](https://user-images.githubusercontent.com/28300167/215254679-71c934ba-e491-4394-9fb8-5fcd998023f4.png)
+测试api服务
+![image](https://user-images.githubusercontent.com/28300167/215254700-cbc9c17d-ccc0-4e52-9ade-95e2823587a0.png)
 
 #### 系统运行
 系统运行环境要求：
