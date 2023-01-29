@@ -18,10 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class ApiConfigServiceImpl implements IApiConfigService {
@@ -92,6 +89,42 @@ public class ApiConfigServiceImpl implements IApiConfigService {
         ApiConfig apiConfig = apiConfigMapper.selectApiConfigByApiName(apiName);
         apiConfig.setParam(JSONObject.parseArray(apiConfig.getParams(), ApiParam.class));
         return apiConfig;
+    }
+
+    @Override
+    public AjaxResult.Response runApiByType(String apiName, List<ApiParam> apiParamList, String method) throws Exception {
+        log.info("=========runApi apiName:{},apiParamList:{},method:{}=============", apiName, JSONObject.toJSONString(apiParamList), method);
+        Map<String, String> paramsMap = new HashMap<>();
+        for (ApiParam apiParam : apiParamList) {
+            paramsMap.put(apiParam.getName(), apiParam.getValue());
+        }
+        ApiConfig apiConfig = selectApiConfigByApiName(apiName);
+        method = method.toLowerCase(Locale.ROOT);
+        AjaxResult.Response response;
+        if (method.equals(apiConfig.getRequestMode())) {
+            DbConfig dbConfig = dbConfigMapper.selectDbConfigById(apiConfig.getDbConfigId());
+            DbTypeEnum dbTypeEnum = DbTypeEnum.findEnumByType(dbConfig.getType());
+            String url = dbConfig.getUrl();
+            String userName = dbConfig.getUserName();
+            String pwd = dbConfig.getPwd();
+            String sql = apiConfig.getApiSql();
+
+            for (ApiParam apiParam : apiConfig.getParam()) {
+                String type = apiParam.getType();
+                if (type.equals("String")) {
+                    sql = sql.replace("{" + apiParam.getName() + "}", "'" + paramsMap.get(apiParam.getName()) + "'");
+                } else if (type.equals("Bigint")) {
+                    sql = sql.replace("{" + apiParam.getName() + "}", paramsMap.get(apiParam.getName()));
+                }
+            }
+            sql = sql.replaceAll("\\$", "");
+            log.info("=====sql:{}===========", sql);
+            List<LinkedHashMap<String, String>> list = RunApi.runSql(dbTypeEnum, url, userName, pwd, sql);
+            response = new AjaxResult.Response(AjaxResult.Type.SUCCESS, "success", list);
+        } else {
+            response = new AjaxResult.Response(AjaxResult.Type.ERROR, "error", "请求类型不匹配");
+        }
+        return response;
     }
 
     @Override

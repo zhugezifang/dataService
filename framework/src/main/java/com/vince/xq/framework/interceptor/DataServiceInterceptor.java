@@ -27,7 +27,8 @@ public class DataServiceInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String path = request.getServletPath();
-        log.info("======DataServiceInterceptor path:{}=======", path);
+        String method = request.getMethod();
+        log.info("======DataServiceInterceptor path:{},method:{}=======", path, method);
         if (path.contains("dataService")) {
             printData(request, response);
             return false;
@@ -62,7 +63,7 @@ public class DataServiceInterceptor implements HandlerInterceptor {
         response.setContentType("application/json; charset=utf-8");
         PrintWriter out = null;
         log.info("=========apiName:{},apiParamList:{}=============", apiName, JSONObject.toJSONString(apiParamList));
-        AjaxResult.Response result = apiConfigService.runApi(apiName, apiParamList);
+        AjaxResult.Response result = apiConfigService.runApiByType(apiName, apiParamList, request.getMethod());
         String res = JSONObject.toJSONString(result);
         try {
             out = response.getWriter();
