@@ -4,14 +4,19 @@ import com.vince.xq.common.constant.Constants;
 import com.vince.xq.common.constant.GenConstants;
 import com.vince.xq.common.core.text.Convert;
 import com.vince.xq.common.enums.DbTypeEnum;
+import com.vince.xq.common.utils.LRUMap;
 import com.vince.xq.common.utils.ShiroUtils;
 import com.vince.xq.common.utils.StringUtils;
+import com.vince.xq.system.domain.ApiConfig;
 import com.vince.xq.system.domain.DbConfig;
 import com.vince.xq.system.mapper.DbConfigMapper;
 import com.vince.xq.system.service.IDbConfigService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +29,22 @@ import java.util.List;
 @Service
 public class DbConfigServiceImpl implements IDbConfigService {
 
+    private static final Logger log = LoggerFactory.getLogger(DbConfigServiceImpl.class);
+
     @Autowired
     private DbConfigMapper dbConfigMapper;
+
+    private LRUMap<Long, DbConfig> dbConfigCache = null;
+
+    @PostConstruct
+    public void init() {
+        dbConfigCache = new LRUMap<>(500);
+        List<DbConfig> dbConfigList = selectDbConfigAll();
+        for (DbConfig dbConfig : dbConfigList) {
+            dbConfigCache.put(dbConfig.getId(), dbConfig);
+        }
+        log.info("dbConfigCache size:" + dbConfigCache.size());
+    }
 
     @Override
     public List<DbConfig> selectDbConfigList(DbConfig dbConfig) {
@@ -59,7 +78,11 @@ public class DbConfigServiceImpl implements IDbConfigService {
 
     @Override
     public DbConfig selectDbConfigById(Long id) {
-        return dbConfigMapper.selectDbConfigById(id);
+        DbConfig dbConfig = dbConfigCache.get(id);
+        if (dbConfig == null) {
+            dbConfig = dbConfigMapper.selectDbConfigById(id);
+        }
+        return dbConfig;
     }
 
     @Override

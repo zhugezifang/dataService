@@ -5,19 +5,21 @@ import com.vince.xq.common.constant.GenConstants;
 import com.vince.xq.common.core.domain.AjaxResult;
 import com.vince.xq.common.core.text.Convert;
 import com.vince.xq.common.enums.DbTypeEnum;
+import com.vince.xq.common.utils.LRUMap;
 import com.vince.xq.common.utils.RunApi;
 import com.vince.xq.common.utils.StringUtils;
 import com.vince.xq.system.domain.ApiConfig;
 import com.vince.xq.system.domain.ApiParam;
 import com.vince.xq.system.domain.DbConfig;
 import com.vince.xq.system.mapper.ApiConfigMapper;
-import com.vince.xq.system.mapper.DbConfigMapper;
 import com.vince.xq.system.service.IApiConfigService;
+import com.vince.xq.system.service.IDbConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
 
 @Service
@@ -25,11 +27,23 @@ public class ApiConfigServiceImpl implements IApiConfigService {
 
     private static final Logger log = LoggerFactory.getLogger(ApiConfigServiceImpl.class);
 
+    private LRUMap<String, ApiConfig> apiConfigCache = null;
+
     @Autowired
     private ApiConfigMapper apiConfigMapper;
 
     @Autowired
-    private DbConfigMapper dbConfigMapper;
+    private IDbConfigService dbConfigService;
+
+    @PostConstruct
+    public void init() {
+        apiConfigCache = new LRUMap<>(500);
+        List<ApiConfig> apiConfigList = selectApiConfigAll();
+        for (ApiConfig apiConfig : apiConfigList) {
+            apiConfigCache.put(apiConfig.getApiName(), apiConfig);
+        }
+        log.info("apiConfigCache size:" + apiConfigCache.size());
+    }
 
     @Override
     public List<ApiConfig> selectApiConfigList(ApiConfig apiConfig) {
@@ -38,7 +52,11 @@ public class ApiConfigServiceImpl implements IApiConfigService {
 
     @Override
     public List<ApiConfig> selectApiConfigAll() {
-        return apiConfigMapper.selectApiConfigAll();
+        List<ApiConfig> apiConfigList = apiConfigMapper.selectApiConfigAll();
+        for (ApiConfig apiConfig : apiConfigList) {
+            apiConfig.setParam(JSONObject.parseArray(apiConfig.getParams(), ApiParam.class));
+        }
+        return apiConfigList;
     }
 
     @Override
@@ -86,23 +104,27 @@ public class ApiConfigServiceImpl implements IApiConfigService {
 
     @Override
     public ApiConfig selectApiConfigByApiName(String apiName) {
-        ApiConfig apiConfig = apiConfigMapper.selectApiConfigByApiName(apiName);
-        apiConfig.setParam(JSONObject.parseArray(apiConfig.getParams(), ApiParam.class));
+        ApiConfig apiConfig = apiConfigCache.get(apiName);
+        if (apiConfig == null) {
+            apiConfig = apiConfigMapper.selectApiConfigByApiName(apiName);
+            apiConfig.setParam(JSONObject.parseArray(apiConfig.getParams(), ApiParam.class));
+        }
         return apiConfig;
     }
 
     @Override
     public AjaxResult.Response runApiByType(String apiName, List<ApiParam> apiParamList, String method) throws Exception {
-        log.info("=========runApi apiName:{},apiParamList:{},method:{}=============", apiName, JSONObject.toJSONString(apiParamList), method);
+        log.info("=========runApiByType apiName:{},apiParamList:{},method:{}=============", apiName, JSONObject.toJSONString(apiParamList), method);
         Map<String, String> paramsMap = new HashMap<>();
         for (ApiParam apiParam : apiParamList) {
             paramsMap.put(apiParam.getName(), apiParam.getValue());
         }
         ApiConfig apiConfig = selectApiConfigByApiName(apiName);
+
         method = method.toLowerCase(Locale.ROOT);
         AjaxResult.Response response;
         if (method.equals(apiConfig.getRequestMode())) {
-            DbConfig dbConfig = dbConfigMapper.selectDbConfigById(apiConfig.getDbConfigId());
+            DbConfig dbConfig = dbConfigService.selectDbConfigById(apiConfig.getDbConfigId());
             DbTypeEnum dbTypeEnum = DbTypeEnum.findEnumByType(dbConfig.getType());
             String url = dbConfig.getUrl();
             String userName = dbConfig.getUserName();
@@ -135,7 +157,7 @@ public class ApiConfigServiceImpl implements IApiConfigService {
             paramsMap.put(apiParam.getName(), apiParam.getValue());
         }
         ApiConfig apiConfig = selectApiConfigByApiName(apiName);
-        DbConfig dbConfig = dbConfigMapper.selectDbConfigById(apiConfig.getDbConfigId());
+        DbConfig dbConfig = dbConfigService.selectDbConfigById(apiConfig.getDbConfigId());
         DbTypeEnum dbTypeEnum = DbTypeEnum.findEnumByType(dbConfig.getType());
         String url = dbConfig.getUrl();
         String userName = dbConfig.getUserName();
