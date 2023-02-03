@@ -3,7 +3,10 @@ package com.vince.xq.common.enums;
 public enum DbTypeEnum {
     MySQL(0, "MySQL", "com.mysql.cj.jdbc.Driver"),
     Hive(1, "Hive", "org.apache.hive.jdbc.HiveDriver"),
-    Doris(2, "Doris", "com.mysql.cj.jdbc.Driver");
+    Doris(2, "Doris", "com.mysql.cj.jdbc.Driver"),
+    Oracle(3, "Oracle", "oracle.jdbc.driver.OracleDriver"),
+    SqlServer(4, "SqlServer", "com.microsoft.sqlserver.jdbc.SQLServerDriver"),
+    TDengine(5, "TDengine", "com.taosdata.jdbc.TSDBDriver");
 
     private int i;
     private String type;
