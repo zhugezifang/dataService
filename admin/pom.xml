@@ -134,7 +134,7 @@
                 </configuration>
             </plugin> -->
         </plugins>
-        <finalName>${project.artifactId}</finalName>
+        <finalName>dataService</finalName>
     </build>
 
 </project>
