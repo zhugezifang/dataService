@@ -141,7 +141,7 @@ public class ApiConfigServiceImpl implements IApiConfigService {
             }
             sql = sql.replaceAll("\\$", "");
             log.info("=====sql:{}===========", sql);
-            List<LinkedHashMap<String, String>> list = RunApi.runSql(dbTypeEnum, url, userName, pwd, sql);
+            List<LinkedHashMap<String, Object>> list = RunApi.runSql(dbTypeEnum, url, userName, pwd, sql);
             response = new AjaxResult.Response(AjaxResult.Type.SUCCESS, "success", list);
         } else {
             response = new AjaxResult.Response(AjaxResult.Type.ERROR, "error", "请求类型不匹配");
@@ -174,7 +174,7 @@ public class ApiConfigServiceImpl implements IApiConfigService {
         }
         sql = sql.replaceAll("\\$", "");
         log.info("=====sql:{}===========", sql);
-        List<LinkedHashMap<String, String>> list = RunApi.runSql(dbTypeEnum, url, userName, pwd, sql);
+        List<LinkedHashMap<String, Object>> list = RunApi.runSql(dbTypeEnum, url, userName, pwd, sql);
         AjaxResult.Response response = new AjaxResult.Response(AjaxResult.Type.SUCCESS, "success", list);
 
         return response;

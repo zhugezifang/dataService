@@ -13,7 +13,7 @@ import java.util.List;
 public class RunApi {
     private static final Logger log = LoggerFactory.getLogger(RunApi.class);
 
-    public static List<LinkedHashMap<String, String>> runSql(DbTypeEnum dbTypeEnum, String url, String userName, String pwd, String sql) throws Exception {
+    public static List<LinkedHashMap<String, Object>> runSql(DbTypeEnum dbTypeEnum, String url, String userName, String pwd, String sql) throws Exception {
         try {
             Class.forName(dbTypeEnum.getConnectDriver());
         } catch (ClassNotFoundException e) {
@@ -26,13 +26,19 @@ public class RunApi {
             ResultSet re = stat.executeQuery(sql);
             ResultSetMetaData metaData = re.getMetaData();  //获取列集
             int columnCount = metaData.getColumnCount(); //获取列的数量
-            List<LinkedHashMap<String, String>> list = new ArrayList<>();
+            List<LinkedHashMap<String, Object>> list = new ArrayList<>();
             while (re.next()) {
-                LinkedHashMap<String, String> hashMap = new LinkedHashMap();
+                LinkedHashMap<String, Object> hashMap = new LinkedHashMap();
                 for (int i = 0; i < columnCount; i++) { //循环列
                     String columnName = metaData.getColumnName(i + 1); //通过序号获取列名,起始值为1
-                    String columnValue = re.getString(columnName);  //通过列名获取值.如果列值为空,columnValue为null,不是字符型
-                    hashMap.put(columnName, columnValue);
+                    int type = metaData.getColumnType(i + 1);
+                    if (Types.INTEGER == type) {
+                        int columnValue = re.getInt(columnName);
+                        hashMap.put(columnName, columnValue);
+                    } else {
+                        String columnValue = re.getString(columnName);
+                        hashMap.put(columnName, columnValue);
+                    }
                 }
                 list.add(hashMap);
             }
