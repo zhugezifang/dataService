@@ -65,8 +65,9 @@ public class DataServiceInterceptor implements HandlerInterceptor {
         PrintWriter out = null;
         log.info("=========apiName:{},apiParamList:{}=============", apiName, JSONObject.toJSONString(apiParamList));
         long startTime = System.currentTimeMillis();
-        AjaxResult.Response result = apiConfigService.runApiByType(apiName, apiParamList, request.getMethod());
-        log.info("costTime:{}", System.currentTimeMillis() - startTime);
+        AjaxResult.Response result = apiConfigService.runApiByType(apiName, apiParamList, request.getMethod(), startTime);
+        long costTime = System.currentTimeMillis() - startTime;
+        log.info("costTime:{}", costTime);
         String res = JSONObject.toJSONString(result);
         try {
             out = response.getWriter();

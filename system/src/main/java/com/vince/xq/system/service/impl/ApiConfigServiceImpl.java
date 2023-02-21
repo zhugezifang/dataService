@@ -113,7 +113,7 @@ public class ApiConfigServiceImpl implements IApiConfigService {
     }
 
     @Override
-    public AjaxResult.Response runApiByType(String apiName, List<ApiParam> apiParamList, String method) throws Exception {
+    public AjaxResult.Response runApiByType(String apiName, List<ApiParam> apiParamList, String method, long startTime) throws Exception {
         log.info("=========runApiByType apiName:{},apiParamList:{},method:{}=============", apiName, JSONObject.toJSONString(apiParamList), method);
         Map<String, String> paramsMap = new HashMap<>();
         for (ApiParam apiParam : apiParamList) {
@@ -125,6 +125,7 @@ public class ApiConfigServiceImpl implements IApiConfigService {
         AjaxResult.Response response;
         if (method.equals(apiConfig.getRequestMode())) {
             DbConfig dbConfig = dbConfigService.selectDbConfigById(apiConfig.getDbConfigId());
+
             DbTypeEnum dbTypeEnum = DbTypeEnum.findEnumByType(dbConfig.getType());
             String url = dbConfig.getUrl();
             String userName = dbConfig.getUserName();
@@ -142,7 +143,13 @@ public class ApiConfigServiceImpl implements IApiConfigService {
             sql = sql.replaceAll("\\$", "");
             log.info("=====sql:{}===========", sql);
             List<LinkedHashMap<String, Object>> list = RunApi.runSql(dbTypeEnum, url, userName, pwd, sql);
-            response = new AjaxResult.Response(AjaxResult.Type.SUCCESS, "success", list);
+            long costTime = System.currentTimeMillis() - startTime;
+            if (costTime > apiConfig.getTimeOut()) {
+                log.info("=====runApiByType 接口响应超时 costTime:{},timeOut:{}===========", costTime, apiConfig.getTimeOut());
+                response = new AjaxResult.Response(AjaxResult.Type.ERROR, "error", "接口请求超时");
+            } else {
+                response = new AjaxResult.Response(AjaxResult.Type.SUCCESS, "success", list);
+            }
         } else {
             response = new AjaxResult.Response(AjaxResult.Type.ERROR, "error", "请求类型不匹配");
         }
