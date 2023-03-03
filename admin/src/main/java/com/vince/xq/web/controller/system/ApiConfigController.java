@@ -22,7 +22,6 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -123,7 +122,11 @@ public class ApiConfigController extends BaseController {
     @GetMapping("/edit/{id}")
     public String edit(@PathVariable("id") Long id, ModelMap mmap) {
         ApiConfig apiConfig = apiConfigService.selectApiConfigById(id);
+        List<DbConfig> dbConfigList = dbConfigService.selectDbConfigAll();
+        mmap.put("dbList", dbConfigList);
+        //回显到页面的
         mmap.put("apiConfig", apiConfig);
+        log.info("=====apiConfig{}=====",apiConfig);
         return prefix + "/edit";
     }
 
@@ -135,9 +138,12 @@ public class ApiConfigController extends BaseController {
     @PostMapping("/edit")
     @ResponseBody
     public AjaxResult editSave(@Validated ApiConfig apiConfig) {
-        if (GenConstants.DBCONFIG_NAME_NOT_UNIQUE.equals(apiConfigService.checkNameUnique(apiConfig))) {
-            return error("修改apiName 名称'" + apiConfig.getApiName() + "'失败，名称已存在");
-        }
+//        if (GenConstants.DBCONFIG_NAME_NOT_UNIQUE.equals(apiConfigService.checkNameUnique(apiConfig))) {
+//            return error("修改apiName 名称'" + apiConfig.getApiName() + "'失败，名称已存在");
+//        }
+        String apiName = apiConfig.getApiName();
+        apiConfig.setApiPath(apiName);
+        log.info("=======apiConfig:{}======",apiConfig);
         return toAjax(apiConfigService.updateApiConfig(apiConfig));
     }
 
