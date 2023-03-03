@@ -79,7 +79,8 @@ public class ApiConfigServiceImpl implements IApiConfigService {
 
     @Override
     public int updateApiConfig(ApiConfig apiConfig) {
-        return 0;
+
+        return apiConfigMapper.updateApiConfig(apiConfig);
     }
 
     @Override
