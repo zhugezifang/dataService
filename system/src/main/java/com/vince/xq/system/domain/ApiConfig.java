@@ -3,13 +3,14 @@ package com.vince.xq.system.domain;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.vince.xq.common.annotation.Excel;
 import com.vince.xq.common.annotation.Excel.ColumnType;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
 /**
  * 岗位表 sys_post
- * 
+ *
  * @author ruoyi
  */
 public class ApiConfig implements Serializable
@@ -216,5 +217,28 @@ public class ApiConfig implements Serializable
 
     public void setParam(List<ApiParam> param) {
         this.param = param;
+    }
+
+    @Override
+    public String toString() {
+        return "ApiConfig{" +
+                "id=" + id +
+                ", dbConfigId=" + dbConfigId +
+                ", apiName='" + apiName + '\'' +
+                ", apiPath='" + apiPath + '\'' +
+                ", requestType='" + requestType + '\'' +
+                ", requestMode='" + requestMode + '\'' +
+                ", apiSql='" + apiSql + '\'' +
+                ", params='" + params + '\'' +
+                ", param=" + param +
+                ", apiResult='" + apiResult + '\'' +
+                ", online=" + online +
+                ", qps=" + qps +
+                ", timeOut=" + timeOut +
+                ", apiToken='" + apiToken + '\'' +
+                ", createBy='" + createBy + '\'' +
+                ", createTime=" + createTime +
+                ", flag=" + flag +
+                '}';
     }
 }

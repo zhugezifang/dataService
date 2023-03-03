@@ -1,85 +1,162 @@
 <!DOCTYPE html>
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" >
 <head>
-	<th:block th:include="include :: header('修改数据库配置')" />
+	<th:block th:include="include :: header('修改API配置')" />
 </head>
 <body class="white-bg">
 <div class="wrapper wrapper-content animated fadeInRight ibox-content">
-	<form class="form-horizontal m" id="form-post-edit" th:object="${dbconfig}">
+	<form class="form-horizontal m" id="form-post-edit" th:object="${apiConfig}">
 		<input id="postId" name="id" type="hidden" th:field="*{id}"/>
+<!--		<div class="form-group">-->
+<!--			<label class="col-sm-3 control-label is-required">dbConfigId：</label>-->
+<!--			<div class="col-sm-8">-->
+<!--				<input class="form-control" type="text" name="dbConfigId" id="dbConfigId" th:field="*{dbConfigId}" required>-->
+<!--			</div>-->
+<!--		</div>-->
+
 		<div class="form-group">
-			<label class="col-sm-3 control-label is-required">connectName：</label>
+			<label class="col-sm-3 control-label is-required">apiName：</label>
 			<div class="col-sm-8">
-				<input class="form-control" type="text" name="connectName" id="connectName" th:field="*{connectName}" required>
+				<input class="form-control" type="text" name="apiName" id="apiName" th:field="*{apiName}" onblur="apiPathFun()" disabled="disabled" required>
 			</div>
 		</div>
+
 		<div class="form-group">
-			<label class="col-sm-3 control-label is-required">type：</label>
+			<label class="col-sm-3 control-label is-required">apiPath：</label>
 			<div class="col-sm-8">
-				<select class="form-control"  name="type" id="type" th:field="*{type}" required>
-					<option value="">--请选择数据库类型--</option>
-					<option th:each="typeList:${dbtypes}" th:value="${typeList}" th:text="${typeList}"></option>
+				<input class="form-control" type="text" name="apiPath" id="apiPath" th:field="*{apiPath}" disabled="disabled" required>
+			</div>
+		</div>
+
+
+
+
+		<div class="form-group">
+			<label class="col-sm-3 control-label is-required">dbConfig：</label>
+			<div class="col-sm-8">
+<!--				th:text="${dbConfig.connectName}"-->
+				<select class="form-control" name="dbConfig" id="dbConfig"  th:field="*{dbConfigId}" required>
+					<option value="">--请选择数据源--</option>
+					<option th:each="dblist:${dbList}" th:value="${dblist.id}" th:text="${dblist.connectName}"></option>
 				</select>
 			</div>
 		</div>
+
 		<div class="form-group">
-			<label class="col-sm-3 control-label is-required">url：</label>
+			<label class="col-sm-3 control-label is-required">请求协议：</label>
 			<div class="col-sm-8">
-				<input class="form-control" type="text" name="url" id="url" th:field="*{url}" required>
+				<select class="form-control" name="requestType" id="requestType"  th:field="*{requestType}" required>
+					<option value="">--请选择请求协议--</option>
+					<option value="http">http</option>
+					<option value="rpc">rpc</option>
+				</select>
 			</div>
 		</div>
 
 		<div class="form-group">
-			<label class="col-sm-3 control-label is-required">userName：</label>
+			<label class="col-sm-3 control-label is-required" >请求方式：</label>
 			<div class="col-sm-8">
-				<input class="form-control" type="text" name="userName" id="userName" th:field="*{userName}" required>
+
+				<select class="form-control" name="requestMode" id="requestMode"  th:field="*{requestMode}" required>
+					<option value="">--请选择请求协议--</option>
+					<option value="get">get</option>
+					<option value="post">post</option>
+				</select>
+
+			</div>
+		</div>
+
+
+
+		<div class="form-group">
+			<label class="col-sm-3 control-label is-required">qps：</label>
+			<div class="col-sm-8">
+				<input class="form-control" type="text" name="qps" id="qps" th:field="*{qps}" required>
+			</div>
+		</div>
+
+
+		<div class="form-group">
+			<label class="col-sm-3 control-label is-required">timeOut：</label>
+			<div class="col-sm-8">
+				<input class="form-control" type="text" name="timeOut" id="timeOut"  th:field="*{timeOut}" required>
+				<span class="m-b-none"><i class="fa fa-info-circle"></i>毫秒</span>
 			</div>
 		</div>
 
 		<div class="form-group">
-			<label class="col-sm-3 control-label is-required">pwd：</label>
+			<label class="col-sm-3 control-label is-required">sql：</label>
 			<div class="col-sm-8">
-				<input class="form-control" type="password" name="pwd" id="pwd" th:value="*{pwd}" required>
+                <textarea class="form-control" name="apiSql" id="apiSql" style="height: 300px"
+						  th:field="*{apiSql}"  required onblur="paramFun()"></textarea>
 			</div>
+			<!--onblur="paramFun()"-->
+
+		</div>
+		<div class="form-group">
+			<label class="col-sm-3 control-label is-required">请求参数：</label>
+			<div class="col-sm-8">
+				<label class="col-sm-3">参数名称：</label>
+				<label class="col-sm-3">参数类型：</label>
+				<label class="col-sm-3">说明：</label>
+			</div>
+		</div>
+
+		<div id="paramDiv">
 		</div>
 	</form>
 </div>
 <th:block th:include="include :: footer" />
 <script type="text/javascript">
-	var prefix = ctx + "system/dbconfig";
+	var prefix = ctx + "system/apiConfig";
 
-	$("#form-post-edit").validate({
-		onkeyup: false,
-		rules:{
-			connectName:{
-				remote: {
-					url: ctx + "system/dbconfig/checkConnectNameUnique",
-					type: "post",
-					dataType: "json",
-					data: {
-						"connectName": function() {
-							return $("input[name='connectName']").val();
-						}
-					},
-					dataFilter: function(data, type) {
-						return $.validate.unique(data);
-					}
-				}
-			},
-		},
-		messages: {
-			"connectName": {
-				remote: "connectName已经存在"
-			}
-		},
-		focusCleanup: true
-	});
-
-	function submitHandler() {
-		if ($.validate.form()) {
-			$.operate.save(prefix + "/edit", $('#form-post-edit').serialize());
-		}
+	function apiPathFun() {
+		$("#apiPath").val($("#apiName").val());
 	}
+	function paramFun() {
+		var paraHtml = "<div class=\"form-group\">\n" +
+				"                <label class=\"col-sm-3\"></label>\n" +
+				"                <div class=\"col-sm-8\">\n" +
+				"                    <div class=\"row\">\n" +
+				"                        <div class=\"col-md-3\">\n" +
+				"                            <input type=\"text\" name=\"paramName\" id=\"paramName\" value=\"paramTxt\" required class=\"form-control\">\n" +
+				"                        </div>\n" +
+				"                        <div class=\"col-md-3\">\n" +
+				"                            <select class=\"col-sm-3 form-control\" name=\"paramType\" id=\"paramType\" required>\n" +
+				"                                <option value=\"String\">String</option>\n" +
+				"                                <option value=\"Bigint\">Bigint</option>\n" +
+				"                            </select>\n" +
+				"                        </div>\n" +
+				"                        <div class=\"col-md-3\">\n" +
+				"                            <input class=\"form-control\" type=\"text\" name=\"remark\" id=\"remark\">\n" +
+				"                        </div>\n" +
+				"                    </div>\n" +
+				"                </div>\n" +
+				"            </div>";
+
+		var sql = $("#apiSql").val();
+		$("#paramDiv").html("");
+		if (sql.trim() == "") {
+			return;
+		}
+		console.log(sql);
+		var regex = /\{(.+?)\}/g;
+		var arr = sql.match(regex);
+		//console.log(arr.length);
+		var paraResultHtml = "";
+		for (var i = 0; i < arr.length; i++) {
+			var txt = arr[i].replace("{", "").replace("}", "");
+			console.log(txt);
+			paraResultHtml += paraHtml.replaceAll("paramName", "paramName" + i).replaceAll("paramType", "paramType" + i).replaceAll("remark", "remark" + i).replaceAll("paramTxt", txt);
+		}
+
+		$("#paramDiv").append(paraResultHtml);
+
+	}
+	function submitHandler() {
+			$.operate.save(prefix + "/edit", $('#form-post-edit').serialize());
+	}
+	window.onload = function(){this.paramFun()}
 </script>
 </body>
 </html>
