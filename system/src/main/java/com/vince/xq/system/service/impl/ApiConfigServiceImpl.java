@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.vince.xq.common.constant.GenConstants;
 import com.vince.xq.common.core.domain.AjaxResult;
 import com.vince.xq.common.core.text.Convert;
+import com.vince.xq.common.datasource.dto.DataSourceDto;
+import com.vince.xq.common.datasource.service.IDataSourceService;
 import com.vince.xq.common.enums.DbTypeEnum;
 import com.vince.xq.common.utils.LRUMap;
 import com.vince.xq.common.utils.RunApi;
@@ -28,7 +30,8 @@ public class ApiConfigServiceImpl implements IApiConfigService {
     private static final Logger log = LoggerFactory.getLogger(ApiConfigServiceImpl.class);
 
     private LRUMap<String, ApiConfig> apiConfigCache = null;
-
+    @Autowired
+    private IDataSourceService dataSourceService;
     @Autowired
     private ApiConfigMapper apiConfigMapper;
 
@@ -156,6 +159,60 @@ public class ApiConfigServiceImpl implements IApiConfigService {
         }
         return response;
     }
+
+
+    @Override
+    public AjaxResult.Response runApiByTypePool(String apiName, List<ApiParam> apiParamList, String method, long startTime) throws Exception {
+        log.info("=========runApiByType apiName:{},apiParamList:{},method:{}=============", apiName, JSONObject.toJSONString(apiParamList), method);
+        Map<String, String> paramsMap = new HashMap<>();
+        for (ApiParam apiParam : apiParamList) {
+            paramsMap.put(apiParam.getName(), apiParam.getValue());
+        }
+        ApiConfig apiConfig = selectApiConfigByApiName(apiName);
+
+        method = method.toLowerCase(Locale.ROOT);
+        AjaxResult.Response response;
+        if (method.equals(apiConfig.getRequestMode())) {
+            DbConfig dbConfig = dbConfigService.selectDbConfigById(apiConfig.getDbConfigId());
+
+            DbTypeEnum dbTypeEnum = DbTypeEnum.findEnumByType(dbConfig.getType());
+            String url = dbConfig.getUrl();
+            String userName = dbConfig.getUserName();
+            String pwd = dbConfig.getPwd();
+            String sql = apiConfig.getApiSql();
+
+            for (ApiParam apiParam : apiConfig.getParam()) {
+                String type = apiParam.getType();
+                if (type.equals("String")) {
+                    sql = sql.replace("{" + apiParam.getName() + "}", "'" + paramsMap.get(apiParam.getName()) + "'");
+                } else if (type.equals("Bigint")) {
+                    sql = sql.replace("{" + apiParam.getName() + "}", paramsMap.get(apiParam.getName()));
+                }
+            }
+            sql = sql.replaceAll("\\$", "");
+            log.info("=====sql:{}===========", sql);
+            DataSourceDto dto = new DataSourceDto();
+            dto.setUsername(userName);
+            dto.setPassword(pwd);
+            dto.setJdbcUrl(url);
+            dto.setDriverName(dbTypeEnum.getConnectDriver());
+            dto.setId(apiConfig.getDbConfigId());
+            dto.setDynSentence(sql);
+            dto.setSourceType(dbConfig.getType());
+            List<com.alibaba.fastjson2.JSONObject> list = dataSourceService.execute(dto);
+            long costTime = System.currentTimeMillis() - startTime;
+            if (costTime > apiConfig.getTimeOut()) {
+                log.info("=====runApiByType 接口响应超时 costTime:{},timeOut:{}===========", costTime, apiConfig.getTimeOut());
+                response = new AjaxResult.Response(AjaxResult.Type.ERROR, "error", "接口请求超时");
+            } else {
+                response = new AjaxResult.Response(AjaxResult.Type.SUCCESS, "success", list);
+            }
+        } else {
+            response = new AjaxResult.Response(AjaxResult.Type.ERROR, "error", "请求类型不匹配");
+        }
+        return response;
+    }
+
 
     @Override
     public AjaxResult.Response runApi(String apiName, List<ApiParam> apiParamList) throws Exception {
