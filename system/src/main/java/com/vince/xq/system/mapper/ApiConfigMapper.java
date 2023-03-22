@@ -1,6 +1,7 @@
 package com.vince.xq.system.mapper;
 
 import com.vince.xq.system.domain.ApiConfig;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
