@@ -33,6 +33,8 @@ public interface IApiConfigService {
 
     public AjaxResult.Response runApiByType(String apiName, List<ApiParam> params, String type,long startTime) throws Exception;
 
+    public AjaxResult.Response runApiByTypePool(String apiName, List<ApiParam> params, String type,long startTime) throws Exception;
+
     public ApiConfig selectApiConfigByApiName(String apiName);
 
 }
