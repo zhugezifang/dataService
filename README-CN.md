@@ -76,6 +76,12 @@ mysql 5.7.36
 
 (5)访问 http://127.0.0.1/ 即可 (账号:admin 密码:admin123)
 
+#### Contributors
+|Alias |Github |Email |
+|:-- |:-- |:-- |
+|zhugezifang|[zhugezifang](https://github.com/zhugezifang)|xiaoqiu2017wy@164.com|
+|shigongxing|[shigongxing](https://github.com/shigongxing)|940947367@qq.com|
+
 #### 技术交流
 ![image](https://user-images.githubusercontent.com/28300167/207255900-152d6834-9602-4ada-91ca-ad9906d89bf8.png)
 
