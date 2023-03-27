@@ -133,9 +133,10 @@
 
 		$("#paramDiv").append(paraResultHtml);
 
-	}
 	function submitHandler() {
+		if ($.validate.form()) {
 			$.operate.save(prefix + "/edit", $('#form-post-edit').serialize());
+		}
 	}
 </script>
 </body>
