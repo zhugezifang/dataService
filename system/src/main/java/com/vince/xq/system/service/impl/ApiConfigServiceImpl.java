@@ -147,6 +147,7 @@ public class ApiConfigServiceImpl implements IApiConfigService {
             sql = sql.replaceAll("\\$", "");
             log.info("=====sql:{}===========", sql);
             List<LinkedHashMap<String, Object>> list = RunApi.runSql(dbTypeEnum, url, userName, pwd, sql);
+<<<<<<< HEAD
             long costTime = System.currentTimeMillis() - startTime;
             if (costTime > apiConfig.getTimeOut()) {
                 log.info("=====runApiByType 接口响应超时 costTime:{},timeOut:{}===========", costTime, apiConfig.getTimeOut());
@@ -154,6 +155,9 @@ public class ApiConfigServiceImpl implements IApiConfigService {
             } else {
                 response = new AjaxResult.Response(AjaxResult.Type.SUCCESS, "success", list);
             }
+=======
+            response = new AjaxResult.Response(AjaxResult.Type.SUCCESS, "success", list);
+>>>>>>> 21d674f (feat:feat int type)
         } else {
             response = new AjaxResult.Response(AjaxResult.Type.ERROR, "error", "请求类型不匹配");
         }
