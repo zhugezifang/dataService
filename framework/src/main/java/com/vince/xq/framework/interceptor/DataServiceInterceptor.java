@@ -43,7 +43,6 @@ public class DataServiceInterceptor implements HandlerInterceptor {
     }
 
     private void printData(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
         List<ApiParam> apiParamList = new ArrayList<>();
         Map<String, String[]> map = request.getParameterMap();
         Set<Map.Entry<String, String[]>> keys = map.entrySet();
@@ -65,7 +64,7 @@ public class DataServiceInterceptor implements HandlerInterceptor {
         PrintWriter out = null;
         log.info("=========apiName:{},apiParamList:{}=============", apiName, JSONObject.toJSONString(apiParamList));
         long startTime = System.currentTimeMillis();
-        AjaxResult.Response result = apiConfigService.runApiByType(apiName, apiParamList, request.getMethod(), startTime);
+        AjaxResult.Response result = apiConfigService.runApiByTypePool(apiName, apiParamList, request.getMethod(), startTime);
         long costTime = System.currentTimeMillis() - startTime;
         log.info("costTime:{}", costTime);
         String res = JSONObject.toJSONString(result);
