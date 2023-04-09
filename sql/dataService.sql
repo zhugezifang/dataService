@@ -24,6 +24,18 @@ CREATE TABLE `api_config` (
                               PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8 COMMENT='api_config';
 
+DROP TABLE IF EXISTS `api_call`;
+CREATE TABLE `api_call` (
+                              `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
+                              `api_name` varchar(255) NOT NULL COMMENT 'api_name',
+                              `params_value` varchar(255) NOT NULL COMMENT 'param',
+                              `start_time` datetime NOT NULL COMMENT 'request_type(http、rpc)',
+                              `end_time` datetime DEFAULT NULL COMMENT 'request_mode(get、post)',
+                              `cost_time` bigint(20) NOT NULL COMMENT 'sql',
+                              `status` tinyint(255) DEFAULT NULL COMMENT '执行状态：1成功，2失败，3超时',
+                              PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8 COMMENT='API调用记录';
+
 -- ----------------------------
 -- Table structure for api_config_version_list
 -- ----------------------------

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vince.xq.system.mapper.ApiCallMapper">
+
+    <resultMap type="ApiCall" id="ApiCallResult">
+        <id property="id" column="id"/>
+        <result property="apiName" column="api_name"/>
+        <result property="paramsValue" column="params_value"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="costTime" column="cost_time"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+    <sql id="selecApiCallVo">
+        select id,
+               api_name,
+               params_value,
+               start_time,
+               end_time,
+               cost_time,
+               status
+        from api_call
+    </sql>
+
+    <insert id="insertApiCall" parameterType="ApiCall" useGeneratedKeys="true" keyProperty="id">
+        insert into api_call(
+        <if test="apiName != null and apiName != ''">api_name,</if>
+        <if test="paramsValue != null and paramsValue != ''">params_value,</if>
+        <if test="startTime != null">start_time,</if>
+        <if test="endTime != null">end_time,</if>
+        <if test="costTime != null and costTime != ''">cost_time,</if>
+        <if test="status != null and status != ''">status</if>
+        )values(
+        <if test="apiName != null and apiName != ''">#{apiName},</if>
+        <if test="paramsValue != null and paramsValue != ''">#{paramsValue},</if>
+        <if test="startTime != null">#{startTime},</if>
+        <if test="endTime != null">#{endTime},</if>
+        <if test="costTime != null and costTime != ''">#{costTime},</if>
+        <if test="status != null and status != ''">#{status}</if>
+        )
+    </insert>
+
+</mapper> 

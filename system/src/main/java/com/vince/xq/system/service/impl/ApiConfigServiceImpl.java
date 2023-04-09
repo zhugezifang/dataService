@@ -4,13 +4,16 @@ import com.alibaba.fastjson.JSONObject;
 import com.vince.xq.common.constant.GenConstants;
 import com.vince.xq.common.core.domain.AjaxResult;
 import com.vince.xq.common.core.text.Convert;
+import com.vince.xq.common.enums.ApiCallStatus;
 import com.vince.xq.common.enums.DbTypeEnum;
 import com.vince.xq.common.utils.LRUMap;
 import com.vince.xq.common.utils.RunApi;
 import com.vince.xq.common.utils.StringUtils;
+import com.vince.xq.system.domain.ApiCall;
 import com.vince.xq.system.domain.ApiConfig;
 import com.vince.xq.system.domain.ApiParam;
 import com.vince.xq.system.domain.DbConfig;
+import com.vince.xq.system.mapper.ApiCallMapper;
 import com.vince.xq.system.mapper.ApiConfigMapper;
 import com.vince.xq.system.service.IApiConfigService;
 import com.vince.xq.system.service.IDbConfigService;
@@ -34,6 +37,9 @@ public class ApiConfigServiceImpl implements IApiConfigService {
 
     @Autowired
     private IDbConfigService dbConfigService;
+
+    @Autowired
+    private ApiCallMapper apiCallMapper;
 
     @PostConstruct
     public void init() {
@@ -125,6 +131,12 @@ public class ApiConfigServiceImpl implements IApiConfigService {
         if (apiConfig == null) {
             return new AjaxResult.Response(AjaxResult.Type.ERROR, "error", "该服务不存在,请检查服务url是否正确");
         }
+        ApiCall apiCall = new ApiCall();
+
+        apiCall.setStartTime(new Date(startTime));
+        apiCall.setApiName(apiName);
+        apiCall.setParamsValue(JSONObject.toJSONString(apiParamList));
+
         method = method.toLowerCase(Locale.ROOT);
         AjaxResult.Response response;
         if (method.equals(apiConfig.getRequestMode())) {
@@ -147,15 +159,23 @@ public class ApiConfigServiceImpl implements IApiConfigService {
             sql = sql.replaceAll("\\$", "");
             log.info("=====sql:{}===========", sql);
             List<LinkedHashMap<String, Object>> list = RunApi.runSql(dbTypeEnum, url, userName, pwd, sql);
-            long costTime = System.currentTimeMillis() - startTime;
+            long endTime = System.currentTimeMillis();
+            long costTime = endTime - startTime;
+            apiCall.setEndTime(new Date(endTime));
+            apiCall.setCostTime(costTime);
             if (costTime > apiConfig.getTimeOut()) {
                 log.info("=====runApiByType 接口响应超时 costTime:{},timeOut:{}===========", costTime, apiConfig.getTimeOut());
                 response = new AjaxResult.Response(AjaxResult.Type.ERROR, "error", "接口请求超时");
+                apiCall.setStatus(ApiCallStatus.TIMEOUT.getType());
             } else {
                 response = new AjaxResult.Response(AjaxResult.Type.SUCCESS, "success", list);
+                apiCall.setStatus(ApiCallStatus.SUCCESS.getType());
             }
+            apiCallMapper.insertApiCall(apiCall);
         } else {
             response = new AjaxResult.Response(AjaxResult.Type.ERROR, "error", "请求类型不匹配");
+            apiCall.setStatus(ApiCallStatus.FAIL.getType());
+            apiCallMapper.insertApiCall(apiCall);
         }
         return response;
     }
