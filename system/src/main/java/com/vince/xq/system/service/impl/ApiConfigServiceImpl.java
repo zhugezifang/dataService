@@ -114,14 +114,17 @@ public class ApiConfigServiceImpl implements IApiConfigService {
     }
 
     @Override
-    public AjaxResult.Response runApiByType(String apiName, List<ApiParam> apiParamList, String method, long startTime) throws Exception {
+    public AjaxResult.Response runApiByType(String apiName, List<ApiParam> apiParamList, String method) throws Exception {
         log.info("=========runApiByType apiName:{},apiParamList:{},method:{}=============", apiName, JSONObject.toJSONString(apiParamList), method);
+        long startTime = System.currentTimeMillis();
         Map<String, String> paramsMap = new HashMap<>();
         for (ApiParam apiParam : apiParamList) {
             paramsMap.put(apiParam.getName(), apiParam.getValue());
         }
         ApiConfig apiConfig = selectApiConfigByApiName(apiName);
-
+        if (apiConfig == null) {
+            return new AjaxResult.Response(AjaxResult.Type.ERROR, "error", "该服务不存在,请检查服务url是否正确");
+        }
         method = method.toLowerCase(Locale.ROOT);
         AjaxResult.Response response;
         if (method.equals(apiConfig.getRequestMode())) {
