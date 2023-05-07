@@ -70,7 +70,7 @@ mysql 5.7.36
 
 (1)将sql目录中的sql文件进行运行在数据库，创建库和表
 
-(2)在根目录下面进行mvn clean package,使用admin/target 目录下的dataSerivce.jar
+(2)在根目录下面运行 mvn clean package -Dmaven.test.skip=true,使用admin/target 目录下的dataSerivce.jar
 
 (3)修改数据库配置信息 application.yml
 
