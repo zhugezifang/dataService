@@ -10,7 +10,7 @@
 [![EN doc](https://img.shields.io/badge/document-English-blue.svg)](README.md)
 [![CN doc](https://img.shields.io/badge/文档-中文版-blue.svg)](README-CN.md)
 
-#### 项目体验地址
+#### 项目在线体验地址
 https://b53c9def027279b16719914b13ec7ac6-app.1024paas.com/login
 
 #### 介绍
