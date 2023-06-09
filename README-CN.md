@@ -91,3 +91,4 @@ mysql 5.7.36
 
 #### 致谢
 感谢ruoyi 提供前端服务
+感谢1024code(https://1024code.com)提供服务部署资源
