@@ -11,7 +11,7 @@
 [![CN doc](https://img.shields.io/badge/文档-中文版-blue.svg)](README-CN.md)
 
 #### 项目在线体验地址
-https://b53c9def027279b16719914b13ec7ac6-app.1024paas.com/login
+https://1024code.com/codecubes/N79zfj2 (可通过1024code进行自动构建运行)
 
 #### 介绍
 dataService 旨在提供全面的数据服务及共享能力，统一管理面向内外部的API服务。
